@@ -118,7 +118,7 @@ TVector<T>::TVector(size_t len) {
     }
 
     for (size_t i = 0; i < length; i++) {
-        (*this)(i) = 0;
+        (*this)(i) = T(0);
     }
 }
 
@@ -237,7 +237,7 @@ template <class T>
 TVector<T> &TVector<T>::redim(size_t l) {
     // ***** Hier fehlt was *****
 
-    double *elemsNeu = new (std::nothrow) T[l];
+    T *elemsNeu = new (std::nothrow) T[l];
 #ifndef NDEBUG
     if (elemsNeu == nullptr) {
         vecError("Nicht genuegend Speicher!");

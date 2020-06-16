@@ -117,7 +117,23 @@ class TMatrix {
         }
 
         return *this;
-    }  // Zuweisung
+    }
+    TMatrix<T> trans() {
+        T *elemsNew = new (std::nothrow) T[rows * cols];
+        for (size_t i = 0; i < cols; i++) {
+            for (size_t j = 0; j < rows; j++) {
+                elemsNew[i * rows + j] = (*this)(j, i);
+            }
+        }
+        size_t temp = rows;
+        rows = cols;
+        cols = temp;
+        delete[] elems;
+        elems = elemsNew;
+        return *this;
+    }
+
+    // Zuweisung
     TMatrix<T> &operator+=(const TMatrix<T> &mat) {
 #ifndef NDEBUG
         if ((rows != mat.rows) || (cols != mat.cols)) {
@@ -355,7 +371,7 @@ std::ostream &operator<<(std::ostream &s, const TMatrix<T> &mat) {
     for (size_t i = 0; i < mat.rows; i++) {
         s << std::endl;
         for (size_t j = 0; j < mat.cols; j++) {
-            s << std::setw(4) << mat(i, j) << " ";
+            s << std::setw(10) << mat(i, j) << " ";
         }
     }
 

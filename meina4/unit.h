@@ -45,8 +45,8 @@ using VFFunction = std::function<Vector(real, const Vector&)>;
 
 // siehe Uebungsblatt
 
-void getExample(int ex_id, Vector& mass, VFFunction& f, Vector& y0, real& tBeg, real& tEnd, real& h0, bool doDraw,
-                bool doOutput = true);
+void getExample(int ex_id, Vector& mass, VFFunction& f, Vector& y0, real& tBeg,
+                real& tEnd, real& h0, bool doDraw, bool doOutput = true);
 
 void checkStep(real t, const Vector& y, bool doDraw, bool doOutput = true);
 

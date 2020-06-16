@@ -1,9 +1,10 @@
-CXXFLAGS = -O3 -g -std=c++17 -Wall -Wextra -Wpedantic
+CXXFLAGS = -O3 -g -std=c++11  -Wall -Wextra -Wpedantic
 
-main:  main.o
-	$(CXX) $(CXXFLAGS) -o $@ $^
 
-main.o: main.cpp tvector.h tmatrix.h
+main:  main.o unit.o IGL.o
+	$(CXX) $(CXXFLAGS) -o $@ $^ -lGL -lX11 -lpthread
+
+main.o: main.cpp tvector.h tmatrix.h unit.h
 	$(CXX) $(CXXFLAGS) -c $<
 
 
@@ -13,6 +14,6 @@ main.o: main.cpp tvector.h tmatrix.h
 
 
 clean:
-	rm -f vector.o matix.o main.o
+	rm -f tvector.o tmatix.o main.o
 
 .PHONY: clean
