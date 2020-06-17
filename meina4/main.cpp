@@ -14,7 +14,32 @@ static real h0;
 static VFFunction f;
 static bool doDraw = true, doOutput = true;
 static Matrix rk_beta_trans;
-
+Vector fkt(real t, const Vector x) {
+    size_t len = x.getLength();
+    Vector result(len);
+    size_t bias = len / 2;
+    size_t num = len / 4;
+    for (size_t i = 0; i < num; i++) {
+        result(i * 2) = x(bias + i * 2);
+        result(i * 2 + 1) = x(bias + i * 2 + 1);
+        Vector sum(2);
+        Vector x_i(2);
+        x_i(0) = x(i * 2);
+        x_i(1) = x(i * 2 + 1);
+        for (size_t j = 0; j < num; j++) {
+            if (j != i) {
+                Vector x_j(2);
+                x_j(0) = x(j * 2);
+                x_j(1) = x(j * 2 + 1);
+                sum += kGrav * mass(j) * (x_j - x_i) /
+                       (powl((x_j - x_i).norm2(), 3));
+            }
+        }
+        result(bias + i * 2) = sum(0);
+        result(bias + i * 2 + 1) = sum(1);
+    }
+    return result;
+}
 void RKStep(VFFunction f, real &t, Vector &y, real &h) {
     size_t m = rk_alpha.getLength();
     real h_ = h;
@@ -57,15 +82,15 @@ void RKStep(VFFunction f, real &t, Vector &y, real &h) {
 }
 
 int main() {
-    for (int i = 1; i <= 1; i++) {
+    for (int i = 6; i <= 6; i++) {
         getExample(i, mass, f, yBeg, tBeg, tEnd, h0, doDraw, doOutput);
         rk_beta_trans.redim(rk_beta.getRows(), rk_beta.getCols());
         rk_beta_trans = rk_beta;
         rk_beta_trans.trans();
+        real tCheck = tBeg, t = tBeg, h = h0;
+        Vector yCheck = yBeg, y = yBeg;
         if (mass.getLength() == 1) {
             /* with f */
-            real tCheck = tBeg, t = tBeg, h = h0;
-            Vector yCheck = yBeg, y = yBeg;
 
             while (t <= tEnd) {
                 tCheck = t;
@@ -76,6 +101,14 @@ int main() {
             checkSolution(tCheck, yCheck);
         } else {
             /* without f */
+
+            while (t <= tEnd) {
+                tCheck = t;
+                yCheck = y;
+                RKStep(fkt, t, y, h);
+                checkStep(t, y, doDraw, doOutput);
+            }
+            checkSolution(tCheck, yCheck);
         }
         getchar();
     }
