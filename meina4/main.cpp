@@ -84,8 +84,9 @@ void RKStep(VFFunction f, real &t, Vector &y, real &h) {
     }
 }
 
-int main() {
-    for (int i = 1; i <= num_examples; i++) {
+int main(int argc, char **argv) {
+    if (argc == 2) {
+        int i = std::stoi(argv[1]);
         getExample(i, mass, f, yBeg, tBeg, tEnd, h0, doDraw, doOutput);
         rk_beta_trans.redim(rk_beta.getRows(), rk_beta.getCols());
         rk_beta_trans = rk_beta;
