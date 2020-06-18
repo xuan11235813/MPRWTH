@@ -62,12 +62,12 @@ void RKStep(VFFunction f, real &t, Vector &y, real &h) {
         real tNext = t + h_;
         real errorNorm = error.normMax();
 
-        real c = 0.9 * pow(eps / error.normMax(), 1.0 / (1 + rk_p));
+        real c = 0.9 * powl(eps / error.normMax(), 1.0 / (1 + rk_p));
 
         if (c < 0.1) {
             h_ *= 0.1;
-        } else if (c > 5) {
-            h_ *= 5;
+        } else if (c > 5.0) {
+            h_ *= 5.0;
         } else {
             h_ *= c;
         }
@@ -79,38 +79,35 @@ void RKStep(VFFunction f, real &t, Vector &y, real &h) {
             break;
         }
     }
+    if (t + h > tEnd) {
+        h = tEnd - t;
+    }
 }
 
 int main() {
-    for (int i = 1; i <= 1; i++) {
+    for (int i = 1; i <= num_examples; i++) {
         getExample(i, mass, f, yBeg, tBeg, tEnd, h0, doDraw, doOutput);
         rk_beta_trans.redim(rk_beta.getRows(), rk_beta.getCols());
         rk_beta_trans = rk_beta;
         rk_beta_trans.trans();
-        real tCheck = tBeg, t = tBeg, h = h0;
-        Vector yCheck = yBeg, y = yBeg;
+        real t = tBeg, h = h0;
+        Vector y = yBeg;
+        checkStep(t, y, doDraw, doOutput);
         if (mass.getLength() == 1) {
             /* with f */
-
-            while (t <= tEnd) {
-                tCheck = t;
-                yCheck = y;
+            while (t < tEnd) {
                 RKStep(f, t, y, h);
                 checkStep(t, y, doDraw, doOutput);
             }
-            checkSolution(tCheck, yCheck);
         } else {
             /* without f */
 
-            while (t <= tEnd) {
-                tCheck = t;
-                yCheck = y;
+            while (t < tEnd) {
                 RKStep(fkt, t, y, h);
                 checkStep(t, y, doDraw, doOutput);
             }
-            checkSolution(tCheck, yCheck);
         }
-        getchar();
+        checkSolution(t, y);
     }
     return 0;
 }
