@@ -109,6 +109,7 @@ int main(int argc, char **argv) {
             }
         }
         checkSolution(t, y);
+        getchar();
     }
     return 0;
 }
