@@ -72,7 +72,7 @@ void realGame() {
         while (1) {
             int targetCol = -1;
             float targetValue = 0.0;
-            findColWithMinMax(board, 0, isYellow, targetCol, targetValue);
+            findColWithMinMax(board, 4, isYellow, targetCol, targetValue);
             if (isYellow) {
                 setBoard(targetCol, Color::yellow, board);
                 int col = nextTurn(targetCol);
@@ -155,19 +155,19 @@ float measureChip(int startCol, int startRow, int endCol, int endRow,
                 return -1;
             }
             if (redNum == 3) {
-                return -0.3;
+                return -0.2;
             }
             if (redNum == 2) {
-                return -0.2;
+                return -0.05;
             }
             if (yellowNum == 4) {
                 return 1;
             }
             if (yellowNum == 3) {
-                return 0.3;
+                return 0.2;
             }
             if (yellowNum == 2) {
-                return 0.2;
+                return 0.05;
             }
         }
     }
@@ -181,7 +181,9 @@ float checkNeighbor(int col, Color color,
     float heuristic = 0.0;
     if (row >= 0) {
         /*----*/
-        for (int i = 0; i < 3; i++) {
+        float maxAbs = 0.0;
+        float maxValue = 0.0;
+        for (int i = 0; i < 4; i++) {
             int startCol = col - i;
             int endCol = startCol + 3;
             int startRow = row;
@@ -191,11 +193,16 @@ float checkNeighbor(int col, Color color,
             if (fabs(result) == 1) {
                 return result;
             } else {
-                heuristic += result;
+                if (fabs(result) >= maxAbs) {
+                    maxValue = result;
+                }
             }
         }
+        heuristic += maxValue;
         /*||||*/
-        for (int i = 0; i < 3; i++) {
+        // maxAbs = 0.0;
+        // maxValue = 0.0;
+        for (int i = 0; i < 4; i++) {
             int startCol = col;
             int endCol = col;
             int startRow = row - i;
@@ -205,11 +212,16 @@ float checkNeighbor(int col, Color color,
             if (fabs(result) == 1) {
                 return result;
             } else {
-                heuristic += result;
+                if (fabs(result) >= maxAbs) {
+                    maxValue = result;
+                }
             }
         }
+        heuristic += maxValue;
         /*////*/
-        for (int i = 0; i < 3; i++) {
+        // maxAbs = 0.0;
+        // maxValue = 0.0;
+        for (int i = 0; i < 4; i++) {
             int startCol = col - i;
             int endCol = startCol + 3;
             int startRow = row - i;
@@ -219,9 +231,31 @@ float checkNeighbor(int col, Color color,
             if (fabs(result) == 1) {
                 return result;
             } else {
-                heuristic += result;
+                if (fabs(result) >= maxAbs) {
+                    maxValue = result;
+                }
             }
         }
+        heuristic += maxValue;
+        /*\\\\*/
+        // maxAbs = 0.0;
+        // maxValue = 0.0;
+        for (int i = 0; i < 4; i++) {
+            int startCol = col - i;
+            int endCol = startCol + 3;
+            int startRow = row + i;
+            int endRow = startRow - 3;
+            float result =
+                measureChip(startCol, startRow, endCol, endRow, copyBoard);
+            if (fabs(result) == 1) {
+                return result;
+            } else {
+                if (fabs(result) >= maxAbs) {
+                    maxValue = result;
+                }
+            }
+        }
+        heuristic += maxValue;
     }
     return heuristic;
 }
@@ -231,7 +265,7 @@ void findColWithMinMax(std::vector<std::vector<Color>> checkBoard,
                        float& targetValue) {
     int colNum = int(checkBoard.size());
     int rowNum = int(checkBoard[0].size());
-    if (remainDepth == 0) {
+    if (true) {
         if (isMax) {
             float currMax = -1.1;
             std::vector<int> maxCol;
@@ -251,8 +285,38 @@ void findColWithMinMax(std::vector<std::vector<Color>> checkBoard,
                     }
                 }
             }
-            targetValue = currMax;
-            targetCol = maxCol[rand() % int(maxCol.size())];
+            if (currMax == 1 || remainDepth == 0) {
+                targetValue = currMax;
+                targetCol = maxCol[rand() % int(maxCol.size())];
+            } else {
+                float currMax = -1.1;
+                std::vector<int> maxCol;
+                maxCol.push_back(-1.1);
+                for (int i = 0; i < colNum; i++) {
+                    if (checkBoard[i][rowNum - 1] == Color::empty) {
+                        int pos = -1;
+                        float value = 0;
+                        int nextDepth = remainDepth - 1;
+                        std::vector<std::vector<Color>> boardCopy = checkBoard;
+                        setBoard(i, Color::yellow, boardCopy);
+                        findColWithMinMax(boardCopy, nextDepth, false, pos,
+                                          value);
+                        if (value > currMax) {
+                            maxCol.clear();
+                            maxCol.push_back(i);
+                            currMax = value;
+                        } else if (value == currMax) {
+                            maxCol.push_back(i);
+                        }
+                        if (currMax == 1) {
+                            break;
+                        }
+                    }
+                }
+                targetCol = maxCol[rand() % int(maxCol.size())];
+                targetValue = currMax;
+            }
+
         } else {
             float currMin = 1.1;
             std::vector<int> minCol;
@@ -272,62 +336,37 @@ void findColWithMinMax(std::vector<std::vector<Color>> checkBoard,
                     }
                 }
             }
-            targetValue = currMin;
-            targetCol = minCol[rand() % int(minCol.size())];
-        }
-    } else {
-        if (isMax) {
-            float currMax = -1.1;
-            std::vector<int> maxCol;
-            maxCol.push_back(-1.1);
-            for (int i = 0; i < colNum; i++) {
-                if (checkBoard[i][rowNum - 1] == Color::empty) {
-                    int pos = -1;
-                    float value = 0;
-                    int nextDepth = remainDepth - 1;
-                    std::vector<std::vector<Color>> boardCopy = checkBoard;
-                    setBoard(i, Color::yellow, boardCopy);
-                    findColWithMinMax(boardCopy, nextDepth, !isMax, pos, value);
-                    if (value > currMax) {
-                        maxCol.clear();
-                        maxCol.push_back(i);
-                        currMax = value;
-                    } else if (value == currMax) {
-                        maxCol.push_back(i);
-                    }
-                    if (currMax == 1) {
-                        break;
-                    }
-                }
-            }
-            targetCol = maxCol[rand() % int(maxCol.size())];
-            targetValue = currMax;
-        } else {
-            float currMin = 1.1;
-            std::vector<int> minCol;
-            minCol.push_back(1.1);
-            for (int i = 0; i < colNum; i++) {
-                if (checkBoard[i][rowNum - 1] == Color::empty) {
-                    int pos = -1;
-                    float value = 0;
-                    int nextDepth = remainDepth - 1;
-                    std::vector<std::vector<Color>> boardCopy = checkBoard;
-                    setBoard(i, Color::red, boardCopy);
-                    findColWithMinMax(boardCopy, nextDepth, !isMax, pos, value);
-                    if (value < currMin) {
-                        minCol.clear();
-                        minCol.push_back(i);
-                        currMin = value;
-                    } else if (value == currMin) {
-                        minCol.push_back(i);
-                    }
-                    if (currMin == -1) {
-                        break;
+            if (currMin == -1 || remainDepth == 0) {
+                targetValue = currMin;
+                targetCol = minCol[rand() % int(minCol.size())];
+            } else {
+                float currMin = 1.1;
+                std::vector<int> minCol;
+                minCol.push_back(1.1);
+                for (int i = 0; i < colNum; i++) {
+                    if (checkBoard[i][rowNum - 1] == Color::empty) {
+                        int pos = -1;
+                        float value = 0;
+                        int nextDepth = remainDepth - 1;
+                        std::vector<std::vector<Color>> boardCopy = checkBoard;
+                        setBoard(i, Color::red, boardCopy);
+                        findColWithMinMax(boardCopy, nextDepth, true, pos,
+                                          value);
+                        if (value < currMin) {
+                            minCol.clear();
+                            minCol.push_back(i);
+                            currMin = value;
+                        } else if (value == currMin) {
+                            minCol.push_back(i);
+                        }
+                        if (currMin == -1) {
+                            break;
+                        }
                     }
                 }
+                targetCol = minCol[rand() % int(minCol.size())];
+                targetValue = currMin;
             }
-            targetCol = minCol[rand() % int(minCol.size())];
-            targetValue = currMin;
         }
     }
 }
