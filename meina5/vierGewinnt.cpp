@@ -9,7 +9,7 @@
 
 // ...
 
-const unsigned int Schwierigkeitsgrad = 2;
+const unsigned int Schwierigkeitsgrad = 4;
 
 enum Color { empty, yellow, red };
 
@@ -22,7 +22,7 @@ float checkNeighbor(int col, Color color,
                     const std::vector<std::vector<Color>> checkBoard);
 float measureChip(int startCol, int startRow, int endCol, int endRow,
                   const std::vector<std::vector<Color>> checkBoard);
-void findColWithMinMax(std::vector<std::vector<Color>> checkBoard,
+bool findColWithMinMax(std::vector<std::vector<Color>> checkBoard,
                        int remainDepth, bool isMax, int& targetCol,
                        float& targetValue);
 void realGame();
@@ -72,15 +72,20 @@ void realGame() {
         while (1) {
             int targetCol = -1;
             float targetValue = 0.0;
-            findColWithMinMax(board, 4, isYellow, targetCol, targetValue);
+            bool state =
+                findColWithMinMax(board, 5, isYellow, targetCol, targetValue);
+            int col = -1;
             if (isYellow) {
                 setBoard(targetCol, Color::yellow, board);
-                int col = nextTurn(targetCol);
+                col = nextTurn(targetCol);
                 setBoard(col, Color::red, board);
             } else {
                 setBoard(targetCol, Color::red, board);
-                int col = nextTurn(targetCol);
+                col = nextTurn(targetCol);
                 setBoard(col, Color::yellow, board);
+            }
+            if (state == true || col < 0) {
+                break;
             }
         }
     }
@@ -155,19 +160,19 @@ float measureChip(int startCol, int startRow, int endCol, int endRow,
                 return -1;
             }
             if (redNum == 3) {
-                return -0.2;
+                return -0.4;
             }
             if (redNum == 2) {
-                return -0.05;
+                return -0.02;
             }
             if (yellowNum == 4) {
                 return 1;
             }
             if (yellowNum == 3) {
-                return 0.2;
+                return 0.4;
             }
             if (yellowNum == 2) {
-                return 0.05;
+                return 0.02;
             }
         }
     }
@@ -181,8 +186,6 @@ float checkNeighbor(int col, Color color,
     float heuristic = 0.0;
     if (row >= 0) {
         /*----*/
-        float maxAbs = 0.0;
-        float maxValue = 0.0;
         for (int i = 0; i < 4; i++) {
             int startCol = col - i;
             int endCol = startCol + 3;
@@ -193,15 +196,10 @@ float checkNeighbor(int col, Color color,
             if (fabs(result) == 1) {
                 return result;
             } else {
-                if (fabs(result) >= maxAbs) {
-                    maxValue = result;
-                }
+                heuristic += result;
             }
         }
-        heuristic += maxValue;
         /*||||*/
-        // maxAbs = 0.0;
-        // maxValue = 0.0;
         for (int i = 0; i < 4; i++) {
             int startCol = col;
             int endCol = col;
@@ -212,15 +210,10 @@ float checkNeighbor(int col, Color color,
             if (fabs(result) == 1) {
                 return result;
             } else {
-                if (fabs(result) >= maxAbs) {
-                    maxValue = result;
-                }
+                heuristic += result;
             }
         }
-        heuristic += maxValue;
         /*////*/
-        // maxAbs = 0.0;
-        // maxValue = 0.0;
         for (int i = 0; i < 4; i++) {
             int startCol = col - i;
             int endCol = startCol + 3;
@@ -231,15 +224,12 @@ float checkNeighbor(int col, Color color,
             if (fabs(result) == 1) {
                 return result;
             } else {
-                if (fabs(result) >= maxAbs) {
-                    maxValue = result;
-                }
+                heuristic += result;
             }
         }
-        heuristic += maxValue;
+
         /*\\\\*/
-        // maxAbs = 0.0;
-        // maxValue = 0.0;
+
         for (int i = 0; i < 4; i++) {
             int startCol = col - i;
             int endCol = startCol + 3;
@@ -250,17 +240,14 @@ float checkNeighbor(int col, Color color,
             if (fabs(result) == 1) {
                 return result;
             } else {
-                if (fabs(result) >= maxAbs) {
-                    maxValue = result;
-                }
+                heuristic += result;
             }
         }
-        heuristic += maxValue;
     }
     return heuristic;
 }
 
-void findColWithMinMax(std::vector<std::vector<Color>> checkBoard,
+bool findColWithMinMax(std::vector<std::vector<Color>> checkBoard,
                        int remainDepth, bool isMax, int& targetCol,
                        float& targetValue) {
     int colNum = int(checkBoard.size());
@@ -288,6 +275,9 @@ void findColWithMinMax(std::vector<std::vector<Color>> checkBoard,
             if (currMax == 1 || remainDepth == 0) {
                 targetValue = currMax;
                 targetCol = maxCol[rand() % int(maxCol.size())];
+                if (currMax == 1) {
+                    return true;
+                }
             } else {
                 float currMax = -1.1;
                 std::vector<int> maxCol;
@@ -339,6 +329,9 @@ void findColWithMinMax(std::vector<std::vector<Color>> checkBoard,
             if (currMin == -1 || remainDepth == 0) {
                 targetValue = currMin;
                 targetCol = minCol[rand() % int(minCol.size())];
+                if (currMin == -1) {
+                    return true;
+                }
             } else {
                 float currMin = 1.1;
                 std::vector<int> minCol;
@@ -369,4 +362,5 @@ void findColWithMinMax(std::vector<std::vector<Color>> checkBoard,
             }
         }
     }
+    return false;
 }
