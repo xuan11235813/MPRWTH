@@ -160,19 +160,19 @@ float measureChip(int startCol, int startRow, int endCol, int endRow,
                 return -1;
             }
             if (redNum == 3) {
-                return -0.4;
+                return -0.01;
             }
             if (redNum == 2) {
-                return -0.02;
+                return -0.0025;
             }
             if (yellowNum == 4) {
                 return 1;
             }
             if (yellowNum == 3) {
-                return 0.4;
+                return 0.01;
             }
             if (yellowNum == 2) {
-                return 0.02;
+                return 0.0025;
             }
         }
     }
@@ -195,8 +195,6 @@ float checkNeighbor(int col, Color color,
                 measureChip(startCol, startRow, endCol, endRow, copyBoard);
             if (fabs(result) == 1) {
                 return result;
-            } else {
-                heuristic += result;
             }
         }
         /*||||*/
@@ -209,8 +207,6 @@ float checkNeighbor(int col, Color color,
                 measureChip(startCol, startRow, endCol, endRow, copyBoard);
             if (fabs(result) == 1) {
                 return result;
-            } else {
-                heuristic += result;
             }
         }
         /*////*/
@@ -223,8 +219,6 @@ float checkNeighbor(int col, Color color,
                 measureChip(startCol, startRow, endCol, endRow, copyBoard);
             if (fabs(result) == 1) {
                 return result;
-            } else {
-                heuristic += result;
             }
         }
 
@@ -239,11 +233,54 @@ float checkNeighbor(int col, Color color,
                 measureChip(startCol, startRow, endCol, endRow, copyBoard);
             if (fabs(result) == 1) {
                 return result;
-            } else {
-                heuristic += result;
             }
         }
+
+        copyBoard = checkBoard;
+        /*----*/
+        for (int i = 0; i < 4; i++) {
+            int startCol = col - i;
+            int endCol = startCol + 3;
+            int startRow = row;
+            int endRow = row;
+            float result =
+                measureChip(startCol, startRow, endCol, endRow, copyBoard);
+            heuristic += result;
+        }
+        /*||||*/
+        for (int i = 0; i < 4; i++) {
+            int startCol = col;
+            int endCol = col;
+            int startRow = row - i;
+            int endRow = startRow + 3;
+            float result =
+                measureChip(startCol, startRow, endCol, endRow, copyBoard);
+            heuristic += result;
+        }
+        /*////*/
+        for (int i = 0; i < 4; i++) {
+            int startCol = col - i;
+            int endCol = startCol + 3;
+            int startRow = row - i;
+            int endRow = startRow + 3;
+            float result =
+                measureChip(startCol, startRow, endCol, endRow, copyBoard);
+            heuristic += result;
+        }
+
+        /*\\\\*/
+
+        for (int i = 0; i < 4; i++) {
+            int startCol = col - i;
+            int endCol = startCol + 3;
+            int startRow = row + i;
+            int endRow = startRow - 3;
+            float result =
+                measureChip(startCol, startRow, endCol, endRow, copyBoard);
+            heuristic += result;
+        }
     }
+
     return heuristic;
 }
 
