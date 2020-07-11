@@ -271,10 +271,10 @@ float heuristic(Board gameBoard) {
 
 float findColWithMinMax(Board gameBoard, int remainDepth, bool isMax,
                         int& targetCol) {
+    if (remainDepth == 0 || gameBoard.isEnd()) {
+        return heuristic(gameBoard);
+    }
     if (isMax) {
-        if (remainDepth == 0 || gameBoard.isEnd()) {
-            return heuristic(gameBoard);
-        }
         float currMax = -1000;
         int currCol = -1;
         std::vector<int> maxCol;
@@ -297,9 +297,6 @@ float findColWithMinMax(Board gameBoard, int remainDepth, bool isMax,
         targetCol = maxCol[rand() % int(maxCol.size())];
         return currMax;
     } else {
-        if (remainDepth == 0 || gameBoard.isEnd()) {
-            return heuristic(gameBoard);
-        }
         float currMin = 1000;
         int currCol = -1;
         std::vector<int> minCol;
