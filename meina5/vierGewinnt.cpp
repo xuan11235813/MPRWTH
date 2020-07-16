@@ -1,7 +1,11 @@
-
+#include <float.h>
 
 #include <cmath>
+#include <fstream>
+#include <iostream>
 #include <ostream>
+#include <random>
+#include <sstream>
 #include <string>
 #include <vector>
 
@@ -334,39 +338,71 @@ int miniMax(Board gameBoard, bool isYellow, int depth) {
     return col;
 }
 
-int main() {
-    int Schwierigkeitsgrad = 4;
-    Board gameBoard(numRows, numCols);
-    startGame(Schwierigkeitsgrad);
+int main(int argc, char** argv) {
+    if (argc == 2) {
+        int Schwierigkeitsgrad = std::stoi(argv[1]);
+        Board gameBoard(numRows, numCols);
 
-    for (unsigned int game = 1; game <= numGames; game++) {
-        gameBoard.reset(numRows, numCols);
-        bool isYellow = true;
-        if (game % 2 == 0) {
-            int col = nextTurn(-1);
-            isYellow = false;
-            gameBoard.setBoard(Color::yellow, col);
-        } else {
-            gameBoard.setBoard(Color::yellow, int(numCols / 2));
-            int col = nextTurn(int(numCols / 2));
-            gameBoard.setBoard(Color::red, col);
-        }
+        if (Schwierigkeitsgrad > 0) {
+            startGame(Schwierigkeitsgrad);
+            for (unsigned int game = 1; game <= numGames; game++) {
+                gameBoard.reset(numRows, numCols);
+                bool isYellow = true;
+                if (game % 2 == 0) {
+                    int col = nextTurn(-1);
+                    isYellow = false;
+                    gameBoard.setBoard(Color::yellow, col);
+                } else {
+                    gameBoard.setBoard(Color::yellow, int(numCols / 2));
+                    int col = nextTurn(int(numCols / 2));
+                    gameBoard.setBoard(Color::red, col);
+                }
 
-        while (1) {
-            int targetCol = -1;
-            int col = -1;
-            targetCol = miniMax(gameBoard, isYellow, 5);
-            if (isYellow) {
-                gameBoard.setBoard(Color::yellow, targetCol);
-                col = nextTurn(targetCol);
-                gameBoard.setBoard(Color::red, col);
-            } else {
-                gameBoard.setBoard(Color::red, targetCol);
-                col = nextTurn(targetCol);
-                gameBoard.setBoard(Color::yellow, col);
+                while (1) {
+                    int targetCol = -1;
+                    int col = -1;
+                    targetCol = miniMax(gameBoard, isYellow, 5);
+                    if (isYellow) {
+                        gameBoard.setBoard(Color::yellow, targetCol);
+                        col = nextTurn(targetCol);
+                        gameBoard.setBoard(Color::red, col);
+                    } else {
+                        gameBoard.setBoard(Color::red, targetCol);
+                        col = nextTurn(targetCol);
+                        gameBoard.setBoard(Color::yellow, col);
+                    }
+                    if (col < 0 || targetCol < 0) {
+                        break;
+                    }
+                }
             }
-            if (col < 0 || targetCol < 0) {
-                break;
+        } else if (Schwierigkeitsgrad == 0) {
+            startGame(Schwierigkeitsgrad);
+            while (1) {
+                std::cout << "yellow: " << std::endl;
+                int turn = -1, re = 0;
+                std::cin >> turn;
+                if (turn >= 0 && turn < numCols) {
+                    re = nextTurn(turn);
+                } else {
+                    std::cout << "illegal input" << std::endl;
+                    break;
+                }
+                if (re == -1) {
+                    break;
+                }
+                std::cout << "red: " << std::endl;
+                turn = -1;
+                std::cin >> turn;
+                if (turn >= 0 && turn < numCols) {
+                    re = nextTurn(turn);
+                } else {
+                    std::cout << "illegal input" << std::endl;
+                    break;
+                }
+                if (re == -1) {
+                    break;
+                }
             }
         }
     }
